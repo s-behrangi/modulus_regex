@@ -34,3 +34,49 @@ fn main() {
     
 }
 
+#[cfg(test)]
+mod tests {
+    use regex::Regex;
+    use rand::{seq::IteratorRandom, rng};
+
+    #[test]
+    fn test_zero_remainder() {
+        for divisor in 3..9 {
+            for base in [2, 8, 10, 16] {
+                let re = Regex::new(&lib::mod_regex(divisor, base, 0)).unwrap();
+                for n in 0..1000 {
+                    let repr: String;
+                    match base {
+                        2 => repr = format!("{:b}", n),
+                        8 => repr = format!("{:o}", n),
+                        10 => repr = format!("{}", n),
+                        _ => repr = format!("{:x}", n),
+                    }
+                    assert_eq!(re.is_match(&repr), n % divisor == 0, "Failed zero-remainder test on n = {}, divisor = {}, base = {}", n, divisor, base);
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn test_nonzero_remainder() {
+        let mut rng = rng();
+        for divisor in 3..9 {
+            for base in [2, 8, 10, 16] {
+                let remainder = (1..divisor).choose(&mut rng).unwrap();
+                let re = Regex::new(&lib::mod_regex(divisor, base, remainder)).unwrap();
+                for n in 0..1000 {
+                    let repr: String;
+                    match base {
+                        2 => repr = format!("{:b}", n),
+                        8 => repr = format!("{:o}", n),
+                        10 => repr = format!("{}", n),
+                        _ => repr = format!("{:x}", n),
+                    }
+                    assert_eq!(re.is_match(&repr), n % divisor == remainder, "Failed nonzero-remainder test on n = {}, divisor = {}, base = {}, r = {}", n, divisor, base, remainder);
+                }
+            }
+        }
+    }
+
+}
