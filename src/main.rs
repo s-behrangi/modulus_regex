@@ -1,8 +1,11 @@
 use wasm_bindgen::prelude::wasm_bindgen;
 use std::collections::HashMap;
+use std::fs;
 
 fn main() {
-    println!("{}", mod_regex(7, 2, 0));
+    let result = mod_regex(31, 10, 0);
+    println!("{result}");
+    fs::write("output.txt", result).unwrap();
 }
 
 #[wasm_bindgen]
@@ -22,17 +25,23 @@ pub fn mod_regex(divisor : usize, base : usize, remainder: usize) -> String {
         }
     }
 
-    let order : Vec<usize>;
-    if remainder == 0{
-        order = (remainder..divisor).chain(0..remainder).rev().collect::<Vec<usize>>();
+    // let order : Vec<usize>;
+    // if remainder == 0{
+    //     order = (remainder..divisor).chain(0..remainder).rev().collect::<Vec<usize>>();
+    // } else {
+    //     order = (remainder + 1..divisor).chain(1..remainder).rev().chain([remainder, 0]).collect::<Vec<usize>>();
+    // }
+
+    let order : Vec<usize> = if remainder == 0{
+        (remainder..divisor).chain(0..remainder).rev().collect::<Vec<usize>>()
     } else {
-        order = (remainder + 1..divisor).chain(1..remainder).rev().chain([remainder, 0]).collect::<Vec<usize>>();
-    }
+        (remainder + 1..divisor).chain(1..remainder).rev().chain([remainder, 0]).collect::<Vec<usize>>()
+    };
 
     for (i, &state) in order.iter().enumerate() { // we proceed in "backwards" looping order down to the accepting state
         // collapse parallel edges
         for node in dfa.iter_mut() {
-            let mut reduced: HashMap::<usize, Vec<String>> = HashMap::new(); //this is backwards
+            let mut reduced: HashMap::<usize, Vec<String>> = HashMap::new();
             for (key, value) in &mut *node {
                 if reduced.keys().any(|x| x == value){
                     reduced.get_mut(value).unwrap().push(key.clone());
@@ -55,14 +64,13 @@ pub fn mod_regex(divisor : usize, base : usize, remainder: usize) -> String {
         }
 
         // TODO: optimize regexes
-        // TODO: add remainder != 0 support
         
         let mut recursive_edges: Vec<String> = Vec::new(); //this section accounts for any edges leading from the node to itself
         for (key, &value) in dfa.get(state).unwrap() {
             if value == state {
                 recursive_edges.push(key.clone());
             }
-        } // technically somewhat redundant with the above?
+        } // technically somewhat redundant with the above? there should not be multiple if the previous step worked
         
         let mut recursive_string = String::new();
         if ! recursive_edges.is_empty() {
@@ -108,7 +116,6 @@ pub fn mod_regex(divisor : usize, base : usize, remainder: usize) -> String {
                 accept_to_start = key.clone();
             }
         }
-
         for (key, value) in starting_state {
             if value == remainder {
                 start_to_accept = key.clone();
@@ -116,8 +123,7 @@ pub fn mod_regex(divisor : usize, base : usize, remainder: usize) -> String {
                 starting_recursion = key.clone();
             }
         }
-
-        return format!("({starting_recursion}|{start_to_accept}({accepting_recursion})*{accept_to_start})*{start_to_accept}({accepting_recursion})*"); 
+        return format!("^({starting_recursion}|{start_to_accept}({accepting_recursion})*{accept_to_start})*{start_to_accept}({accepting_recursion})*$"); 
     }
     "^(".to_string()
      + &dfa.get(remainder)
