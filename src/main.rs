@@ -2,8 +2,9 @@ use wasm_bindgen::prelude::wasm_bindgen;
 use std::collections::HashMap;
 use std::fs;
 
+
 fn main() {
-    let result = mod_regex(31, 10, 0);
+    let result = mod_regex(3, 16, 0);
     println!("{result}");
     fs::write("output.txt", result).unwrap();
 }
@@ -11,7 +12,7 @@ fn main() {
 #[wasm_bindgen]
 pub fn mod_regex(divisor : usize, base : usize, remainder: usize) -> String {
     let base_encoding: Vec<String> = ('0'..='9')
-                                    .chain('A'..='F')
+                                    .chain('a'..='f')
                                     .map(|x| x.to_string())
                                     .collect();
     let mut dfa: Vec<HashMap::<String, usize>> = (0..divisor).map(|_| HashMap::<String, usize>::new()).collect();
@@ -132,4 +133,52 @@ pub fn mod_regex(divisor : usize, base : usize, remainder: usize) -> String {
         .cloned()
         .collect::<Vec<String>>()
         .join("|") + ")*$"
+}
+
+#[cfg(test)]
+mod tests {
+    use regex::Regex;
+    use rand::{seq::IteratorRandom, rng};
+    use super::*;
+
+    #[test]
+    fn test_zero_remainder() {
+        for divisor in 3..9 {
+            for base in [2, 8, 10, 16] {
+                let re = Regex::new(&mod_regex(divisor, base, 0)).unwrap();
+                for n in 0..1000 {
+                    let repr: String;
+                    match base {
+                        2 => repr = format!("{:b}", n),
+                        8 => repr = format!("{:o}", n),
+                        10 => repr = format!("{}", n),
+                        _ => repr = format!("{:x}", n),
+                    }
+                    assert_eq!(re.is_match(&repr), n % divisor == 0, "Failed zero-remainder test on n = {}, divisor = {}, base = {}", n, divisor, base);
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn test_nonzero_remainder() {
+        let mut rng = rng();
+        for divisor in 3..9 {
+            for base in [2, 8, 10, 16] {
+                let remainder = (1..divisor).choose(&mut rng).unwrap();
+                let re = Regex::new(&mod_regex(divisor, base, remainder)).unwrap();
+                for n in 0..1000 {
+                    let repr: String;
+                    match base {
+                        2 => repr = format!("{:b}", n),
+                        8 => repr = format!("{:o}", n),
+                        10 => repr = format!("{}", n),
+                        _ => repr = format!("{:x}", n),
+                    }
+                    assert_eq!(re.is_match(&repr), n % divisor == remainder, "Failed nonzero-remainder test on n = {}, divisor = {}, base = {}, r = {}", n, divisor, base, remainder);
+                }
+            }
+        }
+    }
+
 }
