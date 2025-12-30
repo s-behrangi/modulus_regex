@@ -4,7 +4,7 @@ use std::fs;
 
 
 fn main() {
-    let result = mod_regex(3, 16, 0);
+    let result = mod_regex(7, 2, 0);
     println!("{result}");
     fs::write("output.txt", result).unwrap();
 }
@@ -18,6 +18,7 @@ pub fn mod_regex(divisor : usize, base : usize, remainder: usize) -> String {
     let mut dfa: Vec<HashMap::<String, usize>> = (0..divisor).map(|_| HashMap::<String, usize>::new()).collect();
     // invariant: a State's index in the vector corresponds to its remainder
     // later on, "removing" a state just corresponds to rearranging edges so none reach the given state
+    // we stuff everything in one function to make webassembly easier
 
     for (state, node) in dfa.iter_mut().enumerate() {
         for (next_digit, encoding) in base_encoding.iter().enumerate().take(base) {
@@ -25,13 +26,6 @@ pub fn mod_regex(divisor : usize, base : usize, remainder: usize) -> String {
             node.insert(encoding.clone(), r);
         }
     }
-
-    // let order : Vec<usize>;
-    // if remainder == 0{
-    //     order = (remainder..divisor).chain(0..remainder).rev().collect::<Vec<usize>>();
-    // } else {
-    //     order = (remainder + 1..divisor).chain(1..remainder).rev().chain([remainder, 0]).collect::<Vec<usize>>();
-    // }
 
     let order : Vec<usize> = if remainder == 0{
         (remainder..divisor).chain(0..remainder).rev().collect::<Vec<usize>>()
@@ -65,18 +59,16 @@ pub fn mod_regex(divisor : usize, base : usize, remainder: usize) -> String {
         }
 
         // TODO: optimize regexes
-        
-        let mut recursive_edges: Vec<String> = Vec::new(); //this section accounts for any edges leading from the node to itself
-        for (key, &value) in dfa.get(state).unwrap() {
-            if value == state {
-                recursive_edges.push(key.clone());
-            }
-        } // technically somewhat redundant with the above? there should not be multiple if the previous step worked
-        
-        let mut recursive_string = String::new();
-        if ! recursive_edges.is_empty() {
-            recursive_string = "(".to_string() + &recursive_edges.join("|") + ")*";
-        }
+
+        let recursive_string = if dfa.get(state).unwrap().values().any(|&x| x == state){
+            "(".to_string() + &dfa.get(state)
+                .unwrap()
+                .iter()
+                .filter(|(_, value)| **value == state)
+                .map(|(key, _)| key.clone())
+                .collect::<Vec<String>>()
+                .join("|") + ")*"
+        } else { String::new() };
 
         for &other_state in order[i+1..].iter() {  // replace edges leading to the state to be removed
             let prefixes = dfa.get(other_state)
