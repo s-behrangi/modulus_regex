@@ -1,0 +1,115 @@
+
+body {
+    font-family: Georgia, 'Times New Roman', Times, serif, sans-serif;
+    margin: 1em auto;
+    background-color: rgb(42, 26, 56);
+    color: rgb(236, 220, 255);
+    width: 800px;
+}
+
+.the-meat {
+    padding: 20px 40px;
+    background-color: rgb(70, 49, 88);
+    margin: auto;
+}
+
+.title {
+    text-align: center;
+    margin: auto;
+}
+
+p code {
+    font-size: large;
+}
+
+.warning-div {
+    padding: 0;
+    margin-bottom: -25px;
+    display: flex;
+    flex: auto;
+    align-items: center;
+    gap: 8px;
+}
+
+.warning-div .size-warning {
+    font-size: small;
+    text-align: right;
+    margin-left: auto;
+    color:orange;
+}
+
+.form  {
+    width: 500px;
+}
+
+.form input, textarea {
+    background-color: rgb(192, 164, 255);
+    text-align: left;
+    font-family: 'Courier New', Courier, monospace;
+    color:rgb(21, 16, 32);
+    font-weight: 1000;
+}
+
+.form code {
+    font-size: large;
+}
+
+.input-row {
+    display: flex;
+    flex: auto;
+    align-items: center;
+    gap: 8px;
+
+}
+
+.input-row input {
+    width: 30px; 
+}
+
+.fields {
+    display: flex;
+    flex: auto;
+    gap: 8px
+}
+
+.buttons {
+    margin-left: auto;
+}
+
+.input-row button {
+    padding-top: 1px;
+    padding-bottom: 1px;
+    width: 50px;
+    cursor: pointer;
+    background-color: rgb(192, 164, 255);
+    font-family: 'Courier New', Courier, monospace;
+    font-size: medium;
+}
+
+.output-row textarea {
+    width: calc(100% - 4px);
+    height: 200px;
+    overflow-wrap: anywhere;
+    word-break: break-all;
+}
+
+.constraints {
+    margin-top: -4px;
+    padding-bottom: 5px;
+}
+
+.constraints code {
+    font-size: small;   
+}
+
+.divisor-constraints {
+    padding-left: 89px;
+}
+
+.remainder-constraints {
+    padding-left: 13px;
+}
+
+.base-constraints {
+    padding-left: 54px;
+}

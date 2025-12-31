@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <title>Your Rust WebAssembly Project</title>
+</head>
+<body>
+    <div class = "title">
+        <h1>Calculate modulus with regular expressions</h1>
+    </div>
+    <div class = "the-meat">
+        
+        <div class = "form">
+            <div class = "description">
+            <p>I recently learnt that for any divisor <code>d</code>, remainder <code>r</code>, and base <code>b</code>, it's possible to generate a regular expression that matches exactly all <code>n</code> satisfying <code>n % d = r</code> represented in the given base <code>b</code> </p>
+            <div class = "warning-div">
+            <p>You try:</p>  <code class = "size-warning" id = "size-warning"></code>
+            </div>
+            <br>
+        </div>
+            <div class = "input-row">
+                <div class = "fields">
+                    <code>match n %</code> 
+                    <input type="text" id="divisor" maxlength="2" value="7"> 
+                    <code>=</code> 
+                    <input type="text" id="remainder" maxlength="2" value="0">
+                    <code>in base</code>
+                    <input type="text" id="base" maxlength="2" value="2">
+                </div>
+                <div class = "buttons">
+                    <button id="submit-btn"><b>Go</b></button>
+                    <button id="copy-btn"><i class="fa fa-copy"></i></button>
+                </div>
+            </div>
+
+            <div class = "constraints">
+                <code class = "divisor-constraints"> d &gt; 0</code>
+                <code class = "remainder-constraints">0 &le; r &lt; d</code>
+                <code class = "base-constraints">1 &le; b &le; 16</code>
+                
+            </div>
+
+            <div class = "output-row">
+                <textarea type="text" id="output" wrap="hard"></textarea>
+            </div>
+        </div>
+        <script type="module" src="script.js"></script>
+    </div>
+</body>
+</html>
