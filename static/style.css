@@ -1,6 +1,6 @@
 
 body {
-    font-family: Georgia, 'Times New Roman', Times, serif, sans-serif;
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
     margin: 1em auto;
     background-color: rgb(42, 26, 56);
     color: rgb(236, 220, 255);
@@ -9,6 +9,7 @@ body {
 
 .the-meat {
     padding: 20px 40px;
+    border-radius: 3px;
     background-color: rgb(70, 49, 88);
     margin: auto;
 }
@@ -19,6 +20,12 @@ body {
 }
 
 p code {
+    font-size: large;
+}
+
+.description blockquote {
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: 500;
     font-size: large;
 }
 
@@ -40,6 +47,12 @@ p code {
 }
 
 .form  {
+    border-color: rgb(236, 220, 255);
+    border-style: double; 
+    border-radius: 3px;
+    border-width: 6px;
+    padding: 20px;
+    margin: 0 auto;
     width: 500px;
 }
 
@@ -92,6 +105,7 @@ p code {
     height: 200px;
     overflow-wrap: anywhere;
     word-break: break-all;
+    resize: none;
 }
 
 .constraints {
@@ -113,4 +127,10 @@ p code {
 
 .base-constraints {
     padding-left: 54px;
+}
+
+.empty-string-disclaimer {
+    padding-top: 2px;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: small
 }

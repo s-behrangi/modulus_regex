@@ -39,7 +39,7 @@ async function run() {
         console.log(submit);
         
         if (!input_numeric) {
-            output.value = "Input isn't numeric...";
+            output.value = "Input restricted to non-negative integers...";
         } else{
             const d =  Number(divisor.value);
             const r =  Number(remainder.value);

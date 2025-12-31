@@ -5,25 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <title>Your Rust WebAssembly Project</title>
+    <title>Modulus by Regex</title>
 </head>
 <body>
     <div class = "title">
         <h1>Calculate modulus with regular expressions</h1>
     </div>
     <div class = "the-meat">
-        
-        <div class = "form">
-            <div class = "description">
+        <div class = "description">
             <p>For any divisor <code>d</code>, remainder <code>r</code>, and base <code>b</code>, it's possible to generate a regular expression that matches exactly all <code>n</code> satisfying:</p> 
-            <blockquote><code>n % d = r</code></blockquote>
-            <p> where n is represented in the given base <code>b</code>.</p>
-            <p>The algorithm has exponential complexity and the resulting regex grows just as fast, rendering this method purely theoretical for divisors much larger ~30 or so, but I think the process is neat. </p>
+            <blockquote>n % d = r</blockquote>
+            <p> when n is represented in the given base <code>b</code>. Note that for <code>r = 0</code>, this just tests whether <code>n</code> is divisible by <code>d</code>. There is no theoretical limit on <code>b</code>, but the implementation here only goes to hexadecimal to allow for the obvious encoding.</code></p>
+            <p>The algorithm has exponential complexity and the resulting regex grows just as fast, rendering this method computationally intractable for divisors larger than ~30 or so, but I think the process is neat.</p>
+        </div>
+        <div class = "form">
             <div class = "warning-div">
-            <p>You try:</p>  <code class = "size-warning" id = "size-warning"></code>
+                <p>You try:</p>  <code class = "size-warning" id = "size-warning"></code>
             </div>
             <br>
-        </div>
             <div class = "input-row">
                 <div class = "fields">
                     <code>match n %</code> 
@@ -49,8 +48,15 @@
             <div class = "output-row">
                 <textarea type="text" id="output" wrap="hard"></textarea>
             </div>
+            <div class = "empty-string-disclaimer">
+                Note that the current implementation will also match the empty string (""). To change this, simply replace the trailing Kleene star * with +
+            </div>
         </div>
         <script type="module" src="script.js"></script>
+    <div class = "explanation">
+        <h2> How does this work?</h2>
+        [wip] 
+    </div>
     </div>
 </body>
 </html>
