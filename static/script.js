@@ -1,6 +1,6 @@
 //import init, { mod_regex } from './pkg';
 
-import initSync, { mod_regex } from '/pkg/lib.js';
+import initSync, { mod_regex } from './pkg/lib.js';
 
 async function run() {
     await initSync();
@@ -28,7 +28,7 @@ async function run() {
                     sizeWarning.innerHTML = "Warning: likely to hang";
                     sizeWarning.style.color = "red";
                 }  else if (Number(divisor.value) > 15) {
-                    sizeWarning.innerHTML = "Caution: this d may take minutes for bases past binary";
+                    sizeWarning.innerHTML = "Caution: this d may hang for b >> 2";
                     sizeWarning.style.color = "orange";
                 }
             }

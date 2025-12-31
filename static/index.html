@@ -15,7 +15,10 @@
         
         <div class = "form">
             <div class = "description">
-            <p>I recently learnt that for any divisor <code>d</code>, remainder <code>r</code>, and base <code>b</code>, it's possible to generate a regular expression that matches exactly all <code>n</code> satisfying <code>n % d = r</code> represented in the given base <code>b</code> </p>
+            <p>For any divisor <code>d</code>, remainder <code>r</code>, and base <code>b</code>, it's possible to generate a regular expression that matches exactly all <code>n</code> satisfying:</p> 
+            <blockquote><code>n % d = r</code></blockquote>
+            <p> where n is represented in the given base <code>b</code>.</p>
+            <p>The algorithm has exponential complexity and the resulting regex grows just as fast, rendering this method purely theoretical for divisors much larger ~30 or so, but I think the process is neat. </p>
             <div class = "warning-div">
             <p>You try:</p>  <code class = "size-warning" id = "size-warning"></code>
             </div>
