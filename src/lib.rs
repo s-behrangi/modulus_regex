@@ -3,6 +3,15 @@ use std::collections::HashMap;
 
 #[wasm_bindgen]
 pub fn mod_regex(divisor : usize, base : usize, remainder: usize) -> String {
+    // handle degenerate cases:
+    if base == 0 {
+        if remainder == 0 {
+            return format!("^(0{{{divisor}}})*$");
+        } else {
+            return format!("^0{{{remainder}}}(0{{{divisor}}})*$");
+        }
+    }
+    
     let base_encoding: Vec<String> = ('0'..='9')
                                     .chain('a'..='f')
                                     .map(|x| x.to_string())
@@ -52,7 +61,7 @@ pub fn mod_regex(divisor : usize, base : usize, remainder: usize) -> String {
 
         // TODO: optimize regexes
 
-        let recursive_string = if dfa.get(state).unwrap().values().any(|&x| x == state){
+        let mut recursive_string = if dfa.get(state).unwrap().values().any(|&x| x == state){
             "(".to_string() + &dfa.get(state)
                 .unwrap()
                 .iter()
@@ -61,6 +70,10 @@ pub fn mod_regex(divisor : usize, base : usize, remainder: usize) -> String {
                 .collect::<Vec<String>>()
                 .join("|") + ")*"
         } else { String::new() };
+
+        if recursive_string.len() == 4 {
+            recursive_string = recursive_string[1..2].to_string() + "*";
+        }
 
         for &other_state in order[i+1..].iter() {  // replace edges leading to the state to be removed
             let prefixes = dfa.get(other_state)
@@ -110,13 +123,13 @@ pub fn mod_regex(divisor : usize, base : usize, remainder: usize) -> String {
         }
         return format!("^({starting_recursion}|{start_to_accept}({accepting_recursion})*{accept_to_start})*{start_to_accept}({accepting_recursion})*$"); 
     }
-    "^(".to_string()
+    "^".to_string()
      + &dfa.get(remainder)
         .unwrap()
         .keys()
         .cloned()
         .collect::<Vec<String>>()
-        .join("|") + ")*$"
+        .join("|") + "*$"
 }
 
 #[cfg(test)]

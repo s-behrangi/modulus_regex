@@ -57,7 +57,7 @@ p code {
 }
 
 .form input, textarea {
-    background-color: rgb(192, 164, 255);
+    background-color: rgb(212, 194, 255);
     text-align: left;
     font-family: 'Courier New', Courier, monospace;
     color:rgb(21, 16, 32);
@@ -133,4 +133,20 @@ p code {
     padding-top: 2px;
     font-family: 'Courier New', Courier, monospace;
     font-size: small
+}
+
+a:link {
+  color: rgb(68, 180, 255);
+}
+
+/* Visited link */
+a:visited {
+  color: rgb(255, 0, 255);
+}
+
+.diagram {
+    max-height: 300px;
+    max-width: 100%;
+    display: block;
+    margin: auto;
 }
