@@ -62,7 +62,7 @@ async function run() {
 
     copy.addEventListener("click", () => {
         output.select();
-        output.setSelectionRange(0, 99999); // For mobile devices
+        output.setSelectionRange(0, 99999999); // For mobile devices
         navigator.clipboard.writeText(output.value);
     });
 }

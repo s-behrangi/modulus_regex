@@ -28,8 +28,16 @@ pub fn mod_regex(divisor : usize, base : usize, remainder: usize) -> String {
         }
     }
 
+    // pseudocode idea before i forget:
+    // order is maybe significant
+    // propagate from state 0 outward
+    // find minimal distance from 0 to each state
+    // order should put furthest first
+    // OR: those with fewest edges (lowest degree) first
+
     let order : Vec<usize> = if remainder == 0{
-        (remainder..divisor).chain(0..remainder).rev().collect::<Vec<usize>>()
+        (remainder..divisor).rev().collect::<Vec<usize>>()
+        //(1..divisor).chain(0..1).collect::<Vec<usize>>()
     } else { //behaviour is slightly different if the accepting state isn't 0
         (remainder + 1..divisor).chain(1..remainder).rev().chain([remainder, 0]).collect::<Vec<usize>>()
     };

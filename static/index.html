@@ -64,13 +64,13 @@
 
         <h3>2) Each digit of a numeral has a deterministic effect on its remainder mod d </h3>
 
-        <p>If the <code>i</code> digits we have read so far from the numeral in base <code>b</code> representation have remainder <code>r<sub>i</sub></code> mod <code>d</code>, then upon reading the next digit <code>n</code>, the new running remainder will be:</p>
+        <p>If the <code>i</code> digits we have read so far from the numeral <code>n</code>in base <code>b</code> representation have remainder <code>r<sub>i</sub></code> mod <code>d</code>, then upon reading the next digit <code>x</code>, the new running remainder will be:</p>
 
         <blockquote class = "equation">
-            r<sub>i+1</sub> = b &times; r<sub>i</sub> + n mod d
+            r<sub>i+1</sub> = b &times; r<sub>i</sub> + x mod d
         </blockquote>
         
-        <p>This is guaranteed by the congruence relation of modular arithmetic, in that it is always true that <code>r &equiv; n mod d</code>. Importantly, this means that we don't need to store the <em>value</em> of the digits we have read so far; we only need to maintain a <em>state</em> representing the running remainder, and track transitions between states until we finish reading in the numeral.</p>
+        <p>This is guaranteed by the congruence relation of modular arithmetic, in that it is always true that <code>r &equiv; n mod d</code>. Importantly, this means that we don't need to store the <em>value</em> of the digits we have read so far; we only need to maintain a <em>state</em> representing the running remainder, and track transitions between states until we finish reading in the numeral. Finally, <code>r<sub>0</sub> = 0</code>, because we haven't read anything in yet.</p>
 
         <h3> 3) Therefore, we can produce a DFA that computes the remainder of a numeral</h3>
 
@@ -94,13 +94,13 @@
 
         <img class = "diagram" src="./diagrams/parallel_merge.png">
 
-        <p>Proper DFA notation typically represented disjunction as addition (<code>+</code>), because it is a union operation, but because we're reducing to regex anyway I'm using the corresponding regex operator. Note that the above method applies to recursive transitions, i.e. transitions from a state to itself, just as well.</p>
+        <p>Conventional DFA notation typically represents disjunction as addition (<code>+</code>), because it is a union operation, but because we're reducing to regex anyway I'm using the corresponding regex operator. Note that the above method applies to recursive transitions, i.e. transitions from a state to itself, just as well.</p>
 
         <p>Once we've eliminated the other states, our first DFA becomes:</p>
 
         <img class = "diagram" src="./diagrams/dfa_three_zero_reduced.png">
         
-        <p>The regex representing arbitrarily many repetitions of the remaining recursive transition is the result:</p>
+        <p>There is a slight abuse of notation here in that we are simplifying the role of incoming and outgoing arrows, which should be states of their own. For our purposes this simplification is inconsequential. What this reduced DFA tells us is that any string satisfying the given regular expression is a recursive transition from <code>r = 0</code> back to this state. Any other string will be rejected. Therefore, the regex we want allows arbitrarily many repetitions of this transition and nothing else:</p>
 
         <blockquote>
             <code>(0|1(0(1)*0)*1)*</code>
