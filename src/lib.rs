@@ -3,7 +3,9 @@ use std::collections::HashMap;
 
 #[wasm_bindgen]
 pub fn mod_regex(divisor : usize, base : usize, remainder: usize) -> String {
-    // handle degenerate cases:
+    /* We stuff everything in one function to make WebAssembly easier */
+    
+    /* Handle a degenerate case: */
     if base == 0 {
         if remainder == 0 {
             return format!("^(0{{{divisor}}})*$");
@@ -12,19 +14,19 @@ pub fn mod_regex(divisor : usize, base : usize, remainder: usize) -> String {
         }
     }
     
-    let base_encoding: Vec<String> = ('0'..='9')
-                                    .chain('a'..='f')
-                                    .map(|x| x.to_string())
-                                    .collect();
+    /* Initialize a DFA to reduce by elimination
+    Invariant: a state's index in the DFA vector corresponds
+    to the remainder it represents. Later on, "removing" a 
+    state just curresponds to rearranging edges so none from
+    the remaining states reach the state being removed */
+
+    let base_encoding = "0123456789abcdef";
     let mut dfa: Vec<HashMap::<String, usize>> = (0..divisor).map(|_| HashMap::<String, usize>::new()).collect();
-    // invariant: a State's index in the vector corresponds to its remainder
-    // later on, "removing" a state just corresponds to rearranging edges so none from the remaining states reach the given state
-    // we stuff everything in one function to make webassembly easier
 
     for (state, node) in dfa.iter_mut().enumerate() {
-        for (next_digit, encoding) in base_encoding.iter().enumerate().take(base) {
-            let r = (base * state  + next_digit) % divisor;
-            node.insert(encoding.clone(), r);
+        for digit in 0..base {
+            let r = (base * state  + digit) % divisor;
+            node.insert(base_encoding[digit..digit+1].to_string(), r);
         }
     }
 
@@ -33,7 +35,7 @@ pub fn mod_regex(divisor : usize, base : usize, remainder: usize) -> String {
     // propagate from state 0 outward
     // find minimal distance from 0 to each state
     // order should put furthest first
-    // OR: those with fewest edges (lowest degree) first
+    // OR: those with fewest edges (lowest degree) firsta
 
     let order : Vec<usize> = if remainder == 0{
         (remainder..divisor).rev().collect::<Vec<usize>>()
@@ -43,7 +45,7 @@ pub fn mod_regex(divisor : usize, base : usize, remainder: usize) -> String {
     };
 
     for (i, &state) in order.iter().enumerate() { // we proceed in "backwards" looping order down to the accepting state
-        // collapse parallel edges
+        /* Collapse parallel edges by merging them with disjunction */
         for node in dfa.iter_mut() {
             let mut reduced: HashMap::<usize, Vec<String>> = HashMap::new(); // "reversed" HashMap to combine keys with the same value
             for (key, value) in &mut *node {
@@ -64,11 +66,10 @@ pub fn mod_regex(divisor : usize, base : usize, remainder: usize) -> String {
         }
 
         if state == remainder {
-            continue;
+            continue; //necessary for remainder != 0 
         }
 
-        // TODO: optimize regexes
-
+        /* Get the transitions from the state to itself */
         let mut recursive_string = if dfa.get(state).unwrap().values().any(|&x| x == state){
             "(".to_string() + &dfa.get(state)
                 .unwrap()
@@ -78,18 +79,18 @@ pub fn mod_regex(divisor : usize, base : usize, remainder: usize) -> String {
                 .collect::<Vec<String>>()
                 .join("|") + ")*"
         } else { String::new() };
-
         if recursive_string.len() == 4 {
             recursive_string = recursive_string[1..2].to_string() + "*";
         }
 
-        for &other_state in order[i+1..].iter() {  // replace edges leading to the state to be removed
+        /* Excise a state by replacing all edges leading to it */
+        for &other_state in order[i+1..].iter() {
             let prefixes = dfa.get(other_state)
                             .unwrap()
                             .iter()
                             .filter(|(_, value)| **value == state)
                             .map(|(key, _)| key.clone())
-                            .collect::<Vec<String>>(); // yields exactly all keys leading to state
+                            .collect::<Vec<String>>(); // yields exactly all keys leading from other_state to state
 
             if ! prefixes.is_empty() {
                 for k in &prefixes {
@@ -108,6 +109,8 @@ pub fn mod_regex(divisor : usize, base : usize, remainder: usize) -> String {
     }
 
     if remainder != 0 {
+        /* This section is bulky because HashMaps are designed for
+        the opposite operation, but it is mechanically straighforward */
         let accepting_state = dfa.remove(remainder);
         let starting_state = dfa.remove(0);
         let mut accepting_recursion = String::new();
@@ -137,7 +140,116 @@ pub fn mod_regex(divisor : usize, base : usize, remainder: usize) -> String {
         .keys()
         .cloned()
         .collect::<Vec<String>>()
-        .join("|") + "*$"
+        .join("|") + "*$" //note that because of the parallel merge stage, this won't need any additional parentheses
+}
+
+/* The version of the function below is abbreviated
+because it uses nested vectors instead of HashMaps,
+which simplifies certain operations. However, it 
+produces bulkier regex, so I'm not using it. I'm 
+not certain why this is the case, because the two 
+functions should be algorithmically equivalent. I 
+think it's possible that the HashMaps are merging keys
+and saving space that way, because the effect doesn't
+appear until larger regular expressions, i.e. it is
+not a mere difference of redundant parentheses or 
+something like that. */
+
+pub fn _mod_regex(divisor : usize, base : usize, remainder : usize) -> String {
+    let encoding = "0123456789abcdef";
+    let mut dfa = vec![vec![String::new(); divisor]; divisor];
+    for (r, state) in dfa.iter_mut().enumerate() {
+        for digit in 0..base {
+            let r_next = (base * r + digit) % divisor;
+            state[r_next] = if state[r_next].is_empty() {
+                encoding[digit..digit + 1].to_string()
+            } else {
+                state[r_next].clone() + "|" + &encoding[digit..digit + 1]
+            };
+        } 
+    }
+    
+    let order : Vec<usize> = if remainder == 0{
+        (0..divisor).rev().collect::<Vec<usize>>()
+    } else { //behaviour is slightly different if the accepting state isn't 0
+        (remainder + 1..divisor).chain(1..remainder).rev().chain([remainder, 0]).collect::<Vec<usize>>()
+    };
+
+    for (i, &state) in order.iter().enumerate() {
+        if state == remainder || state == 0{
+            continue;
+        }
+
+        let recursive_transition = if dfa[state][state].is_empty() {
+            String::new()
+        } else if dfa[state][state].len() == 1 || is_bracketed_unit(&dfa[state][state]){
+                dfa[state][state].clone() + "*"
+        } else {
+            "(".to_string() + &dfa[state][state] + ")*"
+        };
+
+        for &start_state in order[i + 1..].iter(){
+            
+            if ! dfa[start_state][state].is_empty() {
+                let start_to_mid = if !is_unbracketed_disjunction(&dfa[start_state][state]){//dfa[start_state][state].contains(&"|") {
+                    dfa[start_state][state].clone()
+                } else {
+                    "(".to_string() + &dfa[start_state][state] + ")"
+                };
+
+                for &end_state in order[i + 1..].iter() {//0..divisor { //to order[i+1..]?
+                    if ! dfa[state][end_state].is_empty() {
+                        let mid_to_end = if !is_unbracketed_disjunction(&dfa[state][end_state]){//dfa[state][end_state].contains(&"|") {
+                            dfa[state][end_state].clone()
+                        } else {
+                            "(".to_string() + &dfa[state][end_state] + ")"
+                        };
+
+                        if dfa[start_state][end_state].is_empty() {
+                            dfa[start_state][end_state] = start_to_mid.clone() + &recursive_transition + &mid_to_end; //dfa[start_state][state].clone() + &recursive_transition + &dfa[state][end_state];
+                        } else {
+                            let start_to_end = if !is_unbracketed_disjunction(&dfa[start_state][end_state]){//dfa[start_state][end_state].contains(&"|") {
+                                dfa[start_state][end_state].clone()
+                            } else {
+                                "(".to_string() + &dfa[start_state][end_state] + ")"
+                            };
+
+                            dfa[start_state][end_state] = start_to_end + "|" + &start_to_mid + &recursive_transition + &mid_to_end; //dfa[start_state][end_state].clone() + "|" + &dfa[start_state][state] + &recursive_transition + &dfa[state][end_state];
+                        }
+                    }
+                }
+
+                dfa[start_state][state] = String::new();
+            }
+
+        }
+    }
+
+    if remainder != 0 {
+        let (a, b, c, d) = (dfa[0][0].clone(), dfa[0][remainder].clone(), dfa[remainder][0].clone(), dfa[remainder][remainder].clone());
+        return format!("^(({a})|(({b})({d})*({c})))*({b})({d})*$");
+    }
+
+    "^(".to_string() + &dfa[0][0] + ")*$"
+}
+
+fn is_unbracketed_disjunction(word: &str) -> bool {
+    word.contains('|') && ! is_bracketed_unit(word)
+}
+
+fn is_bracketed_unit(word: &str) -> bool {
+    /* Assumes string is well-formed! */
+    let is_bracketed = word.starts_with('(') && word.ends_with(')');
+    let is_unit = ! word[..word.len()-1].chars()
+        .scan(0, |acc, c| {
+            match c {
+                '(' => {*acc += 1; Some(*acc)},
+                ')' => {*acc -=1; Some(*acc)},
+                _ => Some(*acc)
+            }
+        })
+        .any(|x| x == 0);
+        is_bracketed && is_unit
 }
 
 #[cfg(test)]
@@ -151,7 +263,7 @@ mod tests {
         for divisor in 3..9 {
             for base in [2, 8, 10, 16] {
                 let re = Regex::new(&mod_regex(divisor, base, 0)).unwrap();
-                for n in 0..1000 {
+                for n in 0..10000 {
                     let repr: String;
                     match base {
                         2 => repr = format!("{:b}", n),

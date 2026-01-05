@@ -31,8 +31,9 @@ p code {
 
 .warning-div {
     padding: 0;
-    margin-top: -15px;
-    margin-bottom: -25px;
+    height: 10px;
+    margin-top: -10px;
+    margin-bottom: -10px;
     display: flex;
     flex: auto;
     align-items: center;
@@ -40,6 +41,7 @@ p code {
 }
 
 .warning-div .size-warning {
+    height: 100%;
     font-size: small;
     text-align: right;
     margin-left: auto;

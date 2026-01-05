@@ -10,7 +10,7 @@ fn main() {
             .read_line(&mut input)
             .expect("failed to read line");
 
-        if input.trim() == "q".to_string() {
+        if input.trim() == "q" {
             break;
         }
 
