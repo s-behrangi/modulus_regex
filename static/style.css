@@ -19,8 +19,12 @@ body {
     margin: auto;
 }
 
+code, .equation {
+    font-family: 'Courier New', Courier, monospace;
+}
+
 p code {
-    font-size: large;
+    font-size: medium;
 }
 
 .description blockquote {

@@ -65,10 +65,10 @@
 
         <h3>2) Each digit of a numeral has a deterministic effect on its remainder mod d </h3>
 
-        <p>If the <code>i</code> digits we have read so far from the numeral <code>n</code> in base <code>b</code> representation have remainder <code>r<sub>i</sub></code> mod <code>d</code>, then upon reading the next digit <code>x</code>, the new running remainder will be:</p>
+        <p>If the <code>i</code> digits we have read so far from the numeral <code>n</code> in base <code>b</code> representation have remainder <code>r<sub>i</sub></code> mod <code>d</code>, then upon reading the next digit <code>j</code>, the new running remainder will be:</p>
 
         <blockquote class = "equation">
-            r<sub>i+1</sub> = b &times; r<sub>i</sub> + x mod d
+            r<sub>i+1</sub> = b &times; r<sub>i</sub> + j mod d
         </blockquote>
         
         <p>This is guaranteed by the congruence relation of modular arithmetic, in that it is always true that <code>r &equiv; n mod d</code>. Importantly, this means that we don't need to store the <em>value</em> of the digits we have read so far; we only need to maintain a <em>state</em> representing the running remainder, and track transitions between states until we finish reading in the numeral.</p>
@@ -123,7 +123,7 @@
             <code>(A|BD*C)*BD*</code>
         </blockquote>
 
-        <p>Where <code>(A|B(D)*C)*</code> represents arbitrarily many returns to the starting state, before arriving at the accepting state with <code>B</code> and possibly looping with <code>(D)*</code>. In this case, the resulting regex is:</p>
+        <p>Where <code>(A|BD*C)*</code> represents arbitrarily many returns to the starting state, before arriving at the accepting state with <code>B</code> and possibly looping with <code>D*</code>. In this case, the resulting regex is:</p>
 
         <blockquote>
             <code>(0|1(01*0)*1)*1(01*0)*</code>
